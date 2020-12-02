@@ -1,34 +1,27 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-// Import of the model Recipe from './models/Recipe.model.js'
-const {User} = require("./model.js");
+const { User } = require("./model.js");
 
 app.set("view engine", "hbs");
 app.set("views", `${__dirname}/views`);
 
-
-// 1. require the body-parser
-const bodyParser = require('body-parser');
-// 2. let know your app you will be using it
+const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const MONGODB_URI = "mongodb://localhost:27017/signup";
 
-
-
-async function connect (){
-  try{
+async function connect() {
+  try {
     const self = await mongoose.connect(MONGODB_URI, {
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     await self.connection.dropDatabase();
-  }catch(e){
+  } catch (e) {
     console.error("Error connecting to the database", error);
   }
-
 }
 
 app.get("/", (req, res) => {
@@ -43,46 +36,43 @@ app.get("/logIn", (req, res) => {
   res.render("login");
 });
 
-
-app.post("/newUser", async (req, res)=>{
+app.post("/newUser", async (req, res) => {
   const { user, password } = req.body;
   //console.log(user,password);
-  const newUser ={
+  const newUser = {
     userName: user,
-    password: password
-  }
-  try{  
+    password: password,
+  };
+  try {
     const datosNewUser = await User.create(newUser);
     //console.log("usuario creado con éxito", datosNewUser.userName, datosNewUser.password);
     res.render("index");
-  }catch(e){
+  } catch (e) {
     res.send(`error ${e} -->datos introducidos no correctos`);
   }
-})
+});
 
-app.post("/loginData", async (req, res)=>{
+app.post("/loginData", async (req, res) => {
   const { user, password } = req.body;
   //console.log(user,password);
-  const newUser ={
+  const newUser = {
     userName: user,
-    password: password
-  }
-  try{  
-    const [datosNewUser] = await User.find({userName:newUser.userName,password:newUser.password});
+    password: password,
+  };
+  try {
+    const [datosNewUser] = await User.find({
+      userName: newUser.userName,
+      password: newUser.password,
+    });
     console.log("Logueado!!", datosNewUser);
-    if(datosNewUser)res.render("homepage");
+    if (datosNewUser) res.render("homepage");
     else {
-      res.send("usuario o contraseña incorrectos")
- 
+      res.send("usuario o contraseña incorrectos");
     }
-    
-  }catch(e){
+  } catch (e) {
     res.send(`error ${e} -->datos no corresponden a ningún usuario`);
   }
-})
-
-
-
+});
 
 mongoose.connection.on("connected", () =>
   console.log("Mongoose default connection open")
